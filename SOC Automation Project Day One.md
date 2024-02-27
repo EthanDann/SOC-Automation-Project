@@ -1,6 +1,7 @@
-﻿Day One
-* Create Logical Diagram:
-   * Windows 10 Client (Wazuh Agent)
+# ﻿Day One
+
+- Create Logical Diagram:
+  * Windows 10 Client (Wazuh Agent)
       * Sends events to the Wazuh Manager
       * Acts as a primary source of endpoint data
    * Wazuh Manager
@@ -22,4 +23,8 @@
       * Provides a centralized platform for incident response and collaboration
    * Email
       * Sends email notifications for critical alerts or incidents
-* Creating the logical diagram helped me gain insight into the workflow of a SOC environment, even if it is just one client and one SOC analyst.
+- Creating the logical diagram helped me gain insight into the workflow of a SOC environment, even if it is just one client and one SOC analyst.
+
+## Next Steps
+
+Tomorrow I will be installing each component and getting set up in the cloud
