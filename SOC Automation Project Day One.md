@@ -23,8 +23,19 @@
       * Provides a centralized platform for incident response and collaboration
    * Email
       * Sends email notifications for critical alerts or incidents
+   * Router
+      * Ensures connectivity amongst all devices within the network and provides access to the internet
+      * Forwards network packets between devices within the local network and beyond
+   * Internet
+      * Enables connectivity to resources and services beyond the local network
+### Reflection  
 - Creating the logical diagram helped me gain insight into the workflow of a SOC environment, even if it is just one client and one SOC analyst.
+
+## Lessons Learned
+
+Already a lesson learned! I initially forgot to add the Router and the Internet from the logical diagram to the documentation, so I added it in so the full picture can be gained from the documentation alone.
 
 ## Next Steps
 
 Tomorrow I will be installing each component and getting set up in the cloud
+
