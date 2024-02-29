@@ -6,9 +6,9 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
 
 - **Wazuh**: Wazuh is used as the SIEM (Security Information and Event Management) and XDR (Extended Detection and Response) platform. It provides real-time monitoring, threat detection, and response capabilities for security incidents.
 
-- **TheHive**: TheHive is utilized for case management. It serves as a centralized platform for incident response, allowing SOC analysts to create, manage, and track alerts and investigations efficiently.
+- **TheHive**: TheHive is used for case management. It is a centralized platform for incident response, allowing the creation, management, and tracking of alerts and investigations efficiently.
 
-- **Shuffle**: Shuffle is employed for SOAR (Security Orchestration, Automation, and Response) capabilities. It enables the automation of repetitive tasks, orchestration of security workflows, and integration with various security tools and systems.
+- **Shuffle**: Shuffle is used for SOAR (Security Orchestration, Automation, and Response) capabilities. It allows the automation of repetitive tasks, orchestration of security workflows, and integration with different security tools and systems.
 
 ## Documentation
 
