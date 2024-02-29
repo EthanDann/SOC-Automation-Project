@@ -25,3 +25,5 @@
  ## Troubleshooting
    I ran into some trouble with initially logging into TheHive via the browser, as I wasn’t provided with credentials; I resolved this by scouring through the documentation (ironically it was at the very top of the quick start guide) until I found the default admin credentials, which I changed as soon as I logged in
 
+## Next Steps
+  Tomorrow I will be configuring TheHive & Wazuh
