@@ -24,11 +24,11 @@
 
    - **Configured Wazuh:**
        * Accessed Wazuh via the browser and added an agent.
-       * Followed the steps provided on the browser, copied and pasted the script provided, and started Wazuh via PowerShell. The Wazuh dashboard showed it as active.
+          * Followed the steps provided on the browser, copied and pasted the script provided, and started Wazuh via PowerShell. The Wazuh dashboard showed it as active.
 
 ## Reflection
 
-Configuring everything was cool to do, as I got to see what all I can change and it was a nice hands-on experience. It was cool to set my PC up as a Wazuh agent and see it show up on the dashboard; the small wins are always nice.
+Configuring everything was cool to do, as I got to see what all I can change and it was a nice hands-on experience. It was cool to set the Windows 10 VM as a Wazuh agent and see it show up on the dashboard; the small wins are always nice.
 
 ## Next Steps
 
