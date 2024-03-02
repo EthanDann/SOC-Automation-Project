@@ -12,4 +12,4 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
 
 ## Documentation
 
-I will be documenting the entire project to improve my documentation skills and gain a better understanding of each day's work. I will do my best to provide accurate descriptions of each day, implementation steps, challenges faced and lessons learned throughout the project.
+I documented the project to improve my documentation skills and gain a better understanding of each day's work. I did my best to provide accurate descriptions of each day, implementation steps, challenges faced and lessons learned throughout the project.
