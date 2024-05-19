@@ -53,6 +53,3 @@ With this being the end of the project, I learned a lot in just five days:
 - I navigated files, installed files and services, and edited and configured files in the terminal
 - I set up both Wazuh and TheHive and configured them accordingly
 - I created a workflow using Shuffle and connected each component to it, boosting incident response time
-
-## Next Steps
-This is technically the end of the project, but I am going to research what else can be done with Shuffle, best practices, etc.
