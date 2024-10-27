@@ -10,6 +10,35 @@ The goal of this project was to gain hands-on experience with a SOC Analyst’s 
 
 - **Shuffle**: Shuffle is used for SOAR (Security Orchestration, Automation, and Response) capabilities. It allows the automation of repetitive tasks, orchestration of security workflows, and integration with different security tools and systems.
 
-## Documentation
+## Project Logical Diagram
 
-I documented the project to improve my documentation skills and gain a better understanding of each day's work. I did my best to provide accurate descriptions of each day, implementation steps, challenges faced and lessons learned throughout the project.
+![SOC Automation Project Diagram](SOC%20Automation%20Project%20Diagram.jpg)
+
+- Create Logical Diagram:
+  * Windows 10 Client (Wazuh Agent)
+      * Sends events to the Wazuh Manager
+      * Acts as a primary source of endpoint data
+   * Wazuh Manager
+      * Receives events from Windows 10 Client
+      * Sends alerts to Shuffle
+   * Shuffle
+      * Receives Wazuh alerts from Wazuh Manager
+      * Sends alerts to TheHive for case management
+      * Sends email notifications to SOC analyst
+   * SOC Analyst:
+      * Receives email notifications from Shuffle
+      * Takes responsive actions based on the alert
+      * Communicates responsive actions back to Shuffle and Wazuh Manager
+   * OSINT Enrichment
+      * Enriches IOCs with OSINT data
+      * Enhances the context and understanding of potential threats
+   * TheHive (Case Management)
+      * Creates and manages alerts within the case management system
+      * Provides a centralized platform for incident response and collaboration
+   * Email
+      * Sends email notifications for critical alerts or incidents
+   * Router
+      * Ensures connectivity amongst all devices within the network and provides access to the internet
+      * Forwards network packets between devices within the local network and beyond
+   * Internet
+      * Enables connectivity to resources and services beyond the local network
