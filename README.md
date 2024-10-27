@@ -60,9 +60,9 @@ The goal of this project was to gain hands-on experience with a SOC Analyst’s 
          curl -sO https://packages.wazuh.com/4.7/wazuh-install.sh && sudo bash ./wazuh-install.sh -a
         ```
       * Extract Wazuh Credentials
-       ```bash
-        sudo tar -xvf wazuh-install-files.tar
-       ```
+        ```bash
+         sudo tar -xvf wazuh-install-files.tar
+        ```
    * Install and configure TheHive
       * Once again, create another Ubuntu VM with the same firewall configuration
       * Access the machine via SSH
