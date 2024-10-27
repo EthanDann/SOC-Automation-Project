@@ -153,3 +153,127 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
               net start wazuhsvc
               ``` 
               * If the agent doesn't show up right away, just give it a minute and it should.
+- Generating Telemetry & Ingesting into Wazuh
+    - Generate Telemetry
+        - Configure `ossec.conf` file.
+            - Create backup of `ossec.conf` file as precaution.
+            - Add ‘symon’ as a local file for log analysis in `ossec.conf`.
+                - Under the 'Log analysis' section, add in the following:
+                  `<localfile>
+                      <location>Microsoft-Windows-Sysmon/Operational</location>
+                      <log_format>eventchannel</log_format>
+                   </localfile>`
+                - For sake of ingestion, remove the 'Application' and 'Security' and 'System' localfiles to only capture Sysmon events
+                    - Can keep these in, this project is only capturing sysmon events so the others aren't necessary
+            - Restart Wazuh service.
+        - Go to Wazuh dashboard to see if sysmon events are being captured
+            - May need to wait a few minutes
+        - Exclude downloads folder from being scanned, to prepare for mimikatz download.
+            - Under 'Virus & Threat Protection', add an exclusion to your downloads folder
+        - Download mimikatz to downloads folder via Github.
+            - May need to disable protection on your browser settings
+        - Run mimikatz in PowerShell with admin privileges.
+            ```bash
+            cd C:\Users\{user}\Downloads\mimikatz_trunk\x64
+            .\mimikatz.exe
+            ``` 
+        - Go to Wazuh security events and search for ‘mimikatz’, nothing should show because an alert has not been created for it yet.
+- Ingest into Wazuh
+    - Access Wazuh manager via SSH and create a copy of `ossec.conf` file as a precaution before editing.
+        ```bash
+        cp /var/ossec/etc/ossec.conf ~/ossec-backup.conf
+        ``` 
+    - Edit the `ossec.conf` file and set 'logall' to 'yes' and 'log_all_json' to 'yes'.
+    - Restart `wazuh-manager` service.
+        ```bash
+        systemctl restart wazuh-manager.service
+        ```
+    - Logs will be placed in `/var/ossec/logs/archives`
+    - Edit `etc/filebeat/filebeat.yml` and set 'archives' to 'true' so Wazuh can start to ingest these files, then restart filebeat.
+    - Go back to Wazuh dashboard, and create a new index pattern for the archives.
+        - Under 'Management', then 'Stack Management'
+        - Click 'create index', and name the index 'wazuh-archives-*'
+        - Set time field to 'timestamp'
+        - Then click 'create index pattern'
+    - Set the index to the 'wazuh-archives-*' index you just created
+    - Search for ‘mimikatz’ once again, and nothing should show up because mimikatz was not ran after the file was edited to log everything.
+    - Run mimikatz once again from PowerShell and ‘mimikatz’ should now show up.
+    - Create a custom rule in Wazuh for mimikatz.
+        - Click home button o Wazuh dashboard, then 'Management' then 'Rules', then click 'Manage rule files'
+        - Copy one of the rules from one of the sysmon rules already created from `0800-sysmon_id_1.xml`
+        - Click 'custom rules' and edit the `local_rules.xml` file, and follow the same format when adding the following:
+            - Set rule id to ‘100002’ and level ‘15’ (for demo purposes).
+            - Set the field name to look for the originalFileName of `(?i)mimikatz\.exe`.
+            - Set the description to ‘Mimikatz Usage Detected’.
+            - Finally set the mitre id to ‘T1003’ for credential dumping, since mimikatz is known to do that.
+        - Restart the manager when prompted.
+        - Change the mimikatz.exe file’s name to ‘youareawesome’ to check that the `originalFileName` field is working correctly.
+        - Start mimikatz using the new name
+            ```bash
+            .\youareawesome.exe
+            ``` 
+    - Mimikatz should now show up on the dashboard
+- Connect Shuffle and Creating Workflow
+    - Connect Shuffle
+        - Create a workflow
+            - Drag Webhook over, click on it and name it ‘Wazuh-Alerts’
+                - Copy the Webhook URI for later use
+            - Click on ‘Change Me’, make sure it's set to 'Repeat back to me' and add a call for an execution argument (add `$exec` under the 'Call' section)
+            - Edit the ossec.conf file with the integration tag for shuffle and configure it to only send alerts with the rule id of “100002”, the rule id for mimikatz
+                - Add the following under the <global> tag, following the same format used in the other tags:
+                ```bash
+                <integration>
+                  <name>shuffle</name>
+                  <hook_url>{hook_uri}</hook_url>
+                  <rule_id>100002</rule_id>
+                  <alert_format>json</alert_format>
+                </integration>
+                ```
+                - Instead of 'hook_uri', paste in the uri copied earlier
+            - Restart Wazuh manager
+                ```bash
+                systemctl restart wazuh-manager.service
+                systemctl status wazuh-manager.service
+                ``` 
+            - Start the Webhook in Shuffle
+            - Rerun mimikatz (.\youareawesome.exe) in powershell
+            - Shuffle should now show the execution argument from Wazuh formatted as JSON if you click on Workflow runs (the running icon)
+    - Create Workflow in Shuffle
+        - Mimikatz alert sent to Shuffle
+        - Shuffle receives Mimikatz alert
+            - Extract SHA256 hash from file using regex
+                - Click on the Change Me icon
+                    - Set the 'find actions' to 'Regex capture group'
+                    - Under 'input data' select the `+` sign and then Execution argument
+                        - Set it to 'hashes'
+                    - Under 'Regex' set it to `SHA256=([09-A-Fa-f]{64}])`
+                        - If having trouble, just search for how to write regex for the SHA256 hash
+            - Rerun the workflow
+        - Check reputation score w/ VirusTotal
+            - Add VirusTotal to Workflow
+                - Create an account on VirusTotal (free), and copy the API key
+            - Set it to get a hash report
+            - Set the ‘hash’ parameter to $sha256_regex.group_0.#
+            - Send details to TheHive to create alert
+            - Add TheHive to Workflow
+            - Go to TheHive on browser and create a new organization with two new users; one as the SOC Analyst and the other for Shuffle
+            - Create an API key for the Shuffle user
+            - Authenticate TheHive in the Workflow
+        - Connect TheHive to Workflow
+            - Set TheHive to create an alert that contains details of the incident
+            - Specific details:
+                - utcTime
+                - description as ‘Mimikatz detected on host: “...system.computer” from user: “...eventdata.user”’
+                - pap as 2
+                - severity as 2
+                - source as ‘Wazuh’
+                - sourceRef as ‘Rule: 100002’
+                - summary as ‘host: “...system.computer” and the process ID: “...eventdata.processID, and the command line is: “...eventdata.commandLine”, the tag as “T1003”
+                - the title as “$exec.title”
+                - tlp as 2
+                - type as Internal
+        - Rerun the workflow and go to TheHive and the alert should now show with the details added in the workflow
+        - Send email to SOC Analyst to begin investigation
+            - Drag Email to workflow
+            - Set a recipient, a subject, and the body to send the time, title, and host computer
+            - Rerun the workflow and you should now receive an email to alert you 
