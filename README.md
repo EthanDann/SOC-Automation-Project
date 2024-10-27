@@ -63,7 +63,7 @@ The goal of this project was to gain hands-on experience with a SOC Analyst’s 
         ```bash
          sudo tar -xvf wazuh-install-files.tar
         ```
-   * Install and configure TheHive
+   * Install TheHive
       * Once again, create another Ubuntu VM with the same firewall configuration
       * Access the machine via SSH
       * Once logged in, install Java, Cassandra, ElasticSearch and then TheHive
@@ -95,13 +95,6 @@ The goal of this project was to gain hands-on experience with a SOC Analyst’s 
              sudo apt update
              sudo apt install elasticsearch
             ```
-          * ***OPTIONAL ELASTICSEARCH***
-            * Do this if you're getting errors when trying to log in using the default credentials
-            * Create a jvm.options file under /etc/elasticsearch/jvm.options.d and paste the following configurations in that file, this tells it to allocate 2gb of memory for Java rather than 4gb
-              * Dlog4j2.formatMsgNoLookups=true
-              * Xms2g
-              * Xmx2g
-            * Once created, restart ElasticSearch service
          * Install TheHive
             ```bash
              wget -O- https://archives.strangebee.com/keys/strangebee.gpg | sudo gpg --dearmor -o /usr/share/keyrings/strangebee-archive-keyring.gpg
@@ -111,3 +104,52 @@ The goal of this project was to gain hands-on experience with a SOC Analyst’s 
             ```
          * Default Credentials on port 9000
            * credentials are 'admin@thehive.local' with a password of 'secret'
+- Configuring TheHive and Wazuh
+   - **TheHive Configuration:**
+       * Edited the `etc/cassandra/cassandra.yaml` file and changed:
+           * cluster_name
+           * listen_address to the public IP of the VM
+           * rpc_address to the same public IP
+           * seeds under seed_provider to the same IP on port number 7000
+       * Restarted the Cassandra service and ensured it was up and running.
+             ```bash
+             systemctl stop cassandra.service
+             ## remove old files because we used TheHive package
+             rm -rf /var/lib/cassandra/*
+             systemctl start cassandra.service
+             systemctl status cassandra.service
+             ```
+   - **ElasticSearch Configuration:**
+       * Edited the `etc/elasticsearch/elasticsearch.yml` file and changed:
+           * cluster.name to ‘thehive’
+           * Un-commented node.name
+           * Changed network.host to the public IP of the VM
+           * Un-commented http.port
+           * Un-commented the cluster.initial_master_nodes and removed node 2 because only node 1 will be used.
+       * Started and enabled elasticsearch and checked the status to ensure it was running.
+       * Changed the ownership of `/opt/thp` to thehive user and thehive group instead of ‘root’.
+            ```bash
+            chown -R thehive:thehive /opt/thp
+            ```
+       * ***Optional Configuration***
+            * Do this if you're getting errors when trying to log in using the default credentials
+            * Create a jvm.options file under /etc/elasticsearch/jvm.options.d and paste the following configurations in that file, this tells it to allocate 2gb of memory for Java rather than 4gb
+              * Dlog4j2.formatMsgNoLookups=true
+              * Xms2g
+              * Xmx2g
+            * Once created, restart ElasticSearch service
+   - **Configuring TheHive application.conf:**
+       * Edited thehive `etc/thehive/application.conf` file to match the cluster-name and hostname of thehive configured earlier, as well as the application.baseUrl to the IP address of thehive.
+       * Start TheHive service
+         ```bash
+         systemctl start thehive
+         systemctl enable thehive
+         systemctl status thehive
+         ```
+   - **Adding Wazuh Agent:**
+       * Access Wazuh via the browser and add an agent.
+          * Follow the steps provided on the browser, copy and past the script provided, and start Wazuh via PowerShell. The Wazuh dashboard will show it as active.
+              ```bash
+              net start wazuhsvc
+              ``` 
+              * If the agent doesn't show up right away, just give it a minute and it should.
