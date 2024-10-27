@@ -1,4 +1,4 @@
-# SOC-Automation-Project
+# SOC Automation Project
 
 The goal of this project was to gain hands-on experience with a SOC Analyst’s tools, including writing better documentation! The project took me from design to start (from scratch) and then to a fully functional lab with responsive capabilities and case management.
 
