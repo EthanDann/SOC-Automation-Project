@@ -348,7 +348,9 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                 - This lists the available active responses, including the one we just made
                 - To utilize the API in Shuffle, the 'Response name' listed will be the one we will add to the API in Shuffle
                 - Create another Ubuntu VM machine using your preferred method
-                    - Configure it however you want!
+                    - Use Lowest Specifications (1GB RAM 25 HDD)
+                    - Allow ALL traffic INBOUND
+                    - Rest is up to you!
                 - To test the active response, go over to your new Ubuntu machine and ping 8.8.8.8 to show that it is pinging it successfully
                     - Now on your Wazuh machine, run
                     ```bash
@@ -389,4 +391,4 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                     - If you want to block it, go to the "True" url
                     - Go back to the Ubuntu machine to see that it did drop it successfully
             - The workflow should look something like this:
-            - ![SOC Automation Project Shuffle Workflow](SOC%20Automation%20Project%20Shuffle%20Workflow.jpg)
+            ![SOC Automation Project Shuffle Workflow](SOC%20Automation%20Project%20Shuffle%20Workflow.jpg)
