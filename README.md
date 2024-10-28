@@ -314,6 +314,11 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                 - Set 'Statement' as 'curl -u {USER}:{PASSWORD} -k -X GET "https://{WAZUH-IP}:55000/security/user/authenticate?raw=true"'
                     - May need to add a rule on firewall to allow tcp port 55000
                     - Make sure to fill in the user, password, and your wazuh-ip to the curl statement
+            - Drag Wazuh-Alerts to the Workflow
+                - Set 'Recipients' to the email you want to get the alert
+                - Set 'Subject' to "Mimikatz Detected!"
+                - Set 'Body' to "Time: {...utctime}, Title: $exec.title, Host: {...computer}
+                - Save and rerun the Workflow
             - Drag Wazuh to the Workflow
                 - Set 'Find actions' to Run command
                 - For the Apikey, click on the `+` icon and click 'get-api'
@@ -342,7 +347,9 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                 ```
                 - This lists the available active responses, including the one we just made
                 - To utilize the API in Shuffle, the 'Response name' listed will be the one we will add to the API in Shuffle
-                - To test the active response, go over to your Ubuntu machine and ping 8.8.8.8 to show that it is pinging it successfully
+                - Create another Ubuntu VM machine using your preferred method
+                    - Configure it however you want!
+                - To test the active response, go over to your new Ubuntu machine and ping 8.8.8.8 to show that it is pinging it successfully
                     - Now on your Wazuh machine, run
                     ```bash
                     ./agent_control -b 8.8.8.8 -f firewall-drop0 -u 002
@@ -373,4 +380,13 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                 - Drag over 'User Input'
                     - Set the 'email' to the email you want to use
                     - Set 'Information' to "Would you like to block the source IP: {...srcip}
-            - Drag Wazuh-Alerts to the Workflow
+                        - Go over to one of the other icons and click the `+` icon and find the 'srcip' under 'Execution Argument' and copy and paste it
+                    - Click on the Wazuh icon and change the "Alert" section 'srcip' from "8.8.8.8" to "{....srcip}" (the one copied)
+                - Connect the VirusTotal icon to the User_Input icon, and the User_Input icon to the Wazuh icon
+                - Head back to the Ubuntu machine and ping 103.100.149.26, or whatever IP address you want to respond to
+                    - Rerun the Shuffle workflow
+                    - Check the email you setup to get the alert
+                    - If you want to block it, go to the "True" url
+                    - Go back to the Ubuntu machine to see that it did drop it successfully
+            - The workflow should look something like this:
+            - ![SOC Automation Project Shuffle Workflow](SOC%20Automation%20Project%20Shuffle%20Workflow.jpg)
