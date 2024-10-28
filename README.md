@@ -252,28 +252,125 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
         - Check reputation score w/ VirusTotal
             - Add VirusTotal to Workflow
                 - Create an account on VirusTotal (free), and copy the API key
-            - Set it to get a hash report
+                - Drag it to Workflow
+            - Set 'Find Actions' to get a hash report
             - Set the ‘hash’ parameter to $sha256_regex.group_0.#
+                - You can click the `+` icon, 'SHA256_Regex', then list, as well
+            - Save Workflow
+            - Run the Workflow again
+                - You'll get a 404 error code, fix this by going to 'Apps' in Shuffle, click on VirusTotal, click 'Fork', scroll down to 'Get a hash report' and edit the URL path by deleting the 'report' part of the path
+                    - If you go to the VirusTotal API page, you can see that the 'Get a hash report' API endpoint doesn't mention a report, it instead mentions just 'file'
+                - Save the changes
+            - Drag the new EDIT_VirusTotal icon into the Workflow
+                - Use the same configurations as before to get the hash
+            - Save Workflow and rerun it again and it should be working
+                - To find the reputation score, go into the JSON, click body, data, attributes, then last_analysis_stats, and it will show somewhere around 63 scanners showing it as 'malicious'
             - Send details to TheHive to create alert
-            - Add TheHive to Workflow
-            - Go to TheHive on browser and create a new organization with two new users; one as the SOC Analyst and the other for Shuffle
-            - Create an API key for the Shuffle user
-            - Authenticate TheHive in the Workflow
-        - Connect TheHive to Workflow
-            - Set TheHive to create an alert that contains details of the incident
-            - Specific details:
-                - utcTime
-                - description as ‘Mimikatz detected on host: “...system.computer” from user: “...eventdata.user”’
-                - pap as 2
-                - severity as 2
-                - source as ‘Wazuh’
-                - sourceRef as ‘Rule: 100002’
-                - summary as ‘host: “...system.computer” and the process ID: “...eventdata.processID, and the command line is: “...eventdata.commandLine”, the tag as “T1003”
-                - the title as “$exec.title”
-                - tlp as 2
-                - type as Internal
-        - Rerun the workflow and go to TheHive and the alert should now show with the details added in the workflow
+                - Drag TheHive icon to Workflow
+                - Go to TheHive on browser and create a new organization with two new users; one as the SOC Analyst and the other for Shuffle
+                    - Click into the organization to add new users
+                        - For the analyst, set the profile to 'analyst'
+                            - Once created, highlight over the new user and click 'preview' and scroll down to set a new password
+                        - For the Shuffle user, set it to a type of 'Service' and the profile to 'analyst' to follow
+                            - In a real world scenario, you would want to create a new profile to follow the principle of least privilege
+                            - Once created, highlight over the Shuffle user and click 'preview' and create a new API key and copy it for Shuffle
+                - Authenticate TheHive in the Workflow
+                    - Click on TheHive icon in Shuffle
+                    - Click on the `+` icon next to Authentication
+                    - Paste in the API key you just copied
+                    - Set the url to http://{TheHive_IP_Address}:9000
+                    - Click Submit
+                - Set 'Find Actions' to create an alert
+                    - First, connect the VirusTotal icon to TheHive so you can get all of the details
+                    - Specific details:
+                        - utcTime
+                            - Under 'Execution Argument'
+                        - Description as ‘Mimikatz detected on host: “...system.computer” from user: “...eventdata.user”’
+                            - Both objects are under 'Execution Argument' as well
+                        - Flag as false
+                        - Pap as 2
+                            - 'Pap' stands for permissible actions protocol, just means the level of exposure of information
+                        - Severity as 2
+                        - Source as ‘Wazuh’
+                        - SourceRef as ‘Rule: 100002’
+                        - Status as 'New'
+                        - Summary as ‘Mimikatz activity detected on host: “...system.computer” and the process ID is: “...eventdata.processID, and the command line is: “...eventdata.commandLine”
+                            - All under 'Execution Argument' as well
+                            - Can add in more, based on preference
+                        - Tags as “T1003”
+                        - Title as “$exec.title”
+                        - tlp as 2
+                            - tlp stands for 'traffic light protocol', the confidentiality of information
+                        - Type as Internal
+                - May need to add a rule on firewall to allow tcp port 9000
+        - Rerun the workflow and go to TheHive on the browser and the alert should now show with the details added in the Workflow
         - Send email to SOC Analyst to begin investigation
-            - Drag Email to workflow
+            - Drag Email to Workflow
             - Set a recipient, a subject, and the body to send the time, title, and host computer
-            - Rerun the workflow and you should now receive an email to alert you 
+            - Rerun the workflow and you should now receive an email to alert you
+        - Setup a response in Shuffle
+            - Drag Http to the Workflow
+                - Set 'Find actions' to curl
+                - Set 'Statement' as 'curl -u {USER}:{PASSWORD} -k -X GET "https://{WAZUH-IP}:55000/security/user/authenticate?raw=true"'
+                    - May need to add a rule on firewall to allow tcp port 55000
+                    - Make sure to fill in the user, password, and your wazuh-ip to the curl statement
+            - Drag Wazuh to the Workflow
+                - Set 'Find actions' to Run command
+                - For the Apikey, click on the `+` icon and click 'get-api'
+                - Set the Url to your Wazuh IP on port 55000
+                - Set the 'Agents list' to "...agent.id"
+                    - Under 'Execution Argument'
+                - Set 'Wait for complete' to true
+            - Head over to Wazuh machine terminal
+                - Edit `var/ossec/etc/ossec.conf`
+                - Do a search for 'active-response' and un-comment the active-response tag and add the following:
+                    ```bash
+                    <active response>
+                      <command>firewall-drop</command>
+                      <location>local</location>
+                      <level>5</level>
+                      <timeout>no</timeout>
+                    </
+                    </active response>
+                    ```
+                    - The scipt will be run on the machine that generated the alert
+                - Save changes
+                - Restart wazuh-manager service
+                - Go to `/var/ossec/bin#` and run
+                ```bash
+                ./agent_control -L
+                ```
+                - This lists the available active responses, including the one we just made
+                - To utilize the API in Shuffle, the 'Response name' listed will be the one we will add to the API in Shuffle
+                - To test the active response, go over to your Ubuntu machine and ping 8.8.8.8 to show that it is pinging it successfully
+                    - Now on your Wazuh machine, run
+                    ```bash
+                    ./agent_control -b 8.8.8.8 -f firewall-drop0 -u 002
+                    ```
+                    - If you go back to the Ubuntu machine, it shouldn't be pinging it anymore; So the active response worked!
+                        - Can also run `iptables --list' to see that it's dropping google dns responses
+                        - Can also go to `/var/ossec/logs/active-responses.log` to see that it's dropping google dns responses as well
+                    - Run `iptables --flush` to get rid of the firewall rule so we can test further
+            - Go back to Shuffle and click on the Wazuh icon
+                - Set the arguments to '["8.8.8.8"]'
+                    - It does need to be an array
+                - Set the 'Command' to 'firewall-drop0'
+                - Save the changes and rerun the Workflow
+            - Go back to the Ubuntu machine and go to `/var/ossec/logs/active-responses.log`
+                - You'll see an error that it can't read the 'srcip' from the data
+                - Right above that error, you'll see the log from Shuffle of it trying to run the active-response, as well as the successful active-response we ran manually
+                    - If you look at the Shuffle log, the "8.8.8.8" is actually in a different location than the successful attempt we ran earlier
+                        - One is under "extra_args", and the other successful one is under "alert.data"
+                    - To fix this, copy everything in the "alert" section of the successful log
+                        - `{"data":{"srcip":"8.8.8.8"}}`
+                    - To test it again, ping 8.8.8.8 once again
+                    - Head back to Shuffle and paste that in under the 'Alert' section of the Wazuh icon
+                    - Save the Workflow and rerun it
+                    - Head back to the Ubuntu machine and see that it's now working
+                    - Run `iptables --flush` to remove the rule
+            - Now we are going to set up a user input so an email is sent to the SOC Analyst to setup the correct response
+                - Click on 'Triggers' on the bottom left of Shuffle
+                - Drag over 'User Input'
+                    - Set the 'email' to the email you want to use
+                    - Set 'Information' to "Would you like to block the source IP: {...srcip}
+            - Drag Wazuh-Alerts to the Workflow
