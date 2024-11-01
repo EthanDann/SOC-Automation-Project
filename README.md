@@ -335,7 +335,6 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                       <location>local</location>
                       <level>5</level>
                       <timeout>no</timeout>
-                    </
                     </active response>
                     ```
                     - The scipt will be run on the machine that generated the alert
