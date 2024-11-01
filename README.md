@@ -380,7 +380,7 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                 - Click on 'Triggers' on the bottom left of Shuffle
                 - Drag over 'User Input'
                     - Set the 'email' to the email you want to use
-                    - Set 'Information' to "Would you like to block the source IP: {...srcip}
+                    - Set 'Information' to "Would you like to block the source IP: {...srcip}"
                         - Go over to one of the other icons and click the `+` icon and find the 'srcip' under 'Execution Argument' and copy and paste it
                     - Click on the Wazuh icon and change the "Alert" section 'srcip' from "8.8.8.8" to "{....srcip}" (the one copied)
                 - Connect the VirusTotal icon to the User_Input icon, and the User_Input icon to the Wazuh icon
