@@ -337,7 +337,7 @@ The goal of this project is to gain hands-on experience with a SOC Analyst’s t
                       <timeout>no</timeout>
                     </active response>
                     ```
-                    - The scipt will be run on the machine that generated the alert
+                    - The script will be run on the machine that generated the alert
                 - Save changes
                 - Restart wazuh-manager service
                 - Go to `/var/ossec/bin#` and run
